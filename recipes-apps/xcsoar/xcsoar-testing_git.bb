@@ -6,7 +6,7 @@ HOMEPAGE = "www.xcsoar.org"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/${LICENSE};md5=801f80980d171dd6425610833a22dbe6"
 SECTION = "base/app"
-PR = "r11"
+PR = "r15"
 RCONFLICTS_${PN}="xcsoar"
 
 DEPENDS = "	\
@@ -40,16 +40,21 @@ S = "${WORKDIR}/git"
 
 LC_LOCALE_PATH = "/usr/share/locale"
 
-SRCREV_pn-xcsoar-testing = "${AUTOREV}" 
+#SRCREV_pn-xcsoar-testing = "${AUTOREV}" 
 
 SRC_URI = " \
-	git://github.com/XCSoar/XCSoar.git;protocol=git;branch=master \
+	git://github.com/XCSoar/XCSoar.git;protocol=git;tag=v7.0_preview15 \
 	file://0005-Adapted-toolchain-prefixes-for-cross-compile.patch \
 	file://0001-Adapted-Flags-for-compiler-and-linker-for-cross-comp.patch \
 	file://0001-Disable-warnings-as-errors.patch \
 	file://0001_no_version_lua.patch \
 	file://0001-avoid-tail-cut.patch \
-	file://0007-Fix-software-display-rotation.patch \
+  file://0104-Replace-bitmap-vario-scale-by-drawn-lines.patch \
+  file://0105-Allow-navigation-from-device-list-to-buttons-by-pres2.patch \
+  file://0110-Add-vario-volume-interface.patch \
+  file://0120-Improve-audio-vario-sound-by-using-A-major-minor2.patch \
+  file://0121-Add-vario-geometry-for-portrait-mode.patch \
+  file://0150-Allow-for-more-control-over-alternates-and-flarm-tar.patch \
 	file://ov-xcsoar.conf \
 "
 

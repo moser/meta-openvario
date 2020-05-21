@@ -1,0 +1,77 @@
+[A Check]
+Hauptbolzen gesichert
+Ruderanschlüsse
+Gurte OK
+Handlochdeckel fest und abgeklebt
+Druckabnahmen frei
+Fremdkörper
+Gepäck gesichert
+Außenflächen richtig verbunden
+Höhenleitwerk richtig angeschlossen, fest und gesichert
+Ruderprobe
+Gas, Choke, Prop-Bremse
+Spannung Zahnriemen
+Propeller intakt
+
+
+[B Startcheck]
+Spornkuller entfernt
+Fallschirm angelegt
+Fallschirm-Auslöseleine eingehängt
+Pedale eingestellt
+Gurte richtig und fest
+Bremsklappen freigängig
+Ruder freigängig
+Wölbklappe alle Stellungen möglich
+Trimmung neutral
+Funk ein, richtige Frequenz
+Höhenmesser 0 oder Platzhöhe
+Haube verriegelt
+
+
+
+[C Eigenstart]
+Spiegel aufklappen
+Vario auf Stat
+DEI an
+Ausfahrschalter rechts bis ausgefahren
+"Engine Door" aus
+Zündung an
+Choke voll ziehen bei kaltem Motor
+Gas ~1.5cm
+Prop frei?
+Starter betätigen
+3000 RPM einstellen, Choke dabei weg
+Magnetcheck
+DEI-off check
+Steigflug Wölbklappe +6
+
+
+[D Einfahren]
+Gas: Leerlauf
+Höhenruder nachlassen, trimmen
+Zündung aus
+Prop abbremsen & senkrecht stellen
+Einfahrschalter links
+"Engine Door" aus -> ganz eingefahren
+DEI aus
+Vario auf TE
+
+
+[E Wiederstart]
+500m über Grund!?
+Headset auf
+Spiegel aufklappen
+Vario auf Stat
+DEI an
+Wölbklappe +6, 90 km/h
+Ausfahrschalter rechts bis ausgefahren
+Choke voll ziehen bei kaltem Motor
+Gas ~1.5cm
+Starter betätigen
+Mehr Gas, Choke weg
+
+
+[F Windenstart]
+Wölbklappe +8
+Schleppgeschwindigkeit 110-120 km/h

@@ -1,0 +1,38 @@
+From 664a1d5562250830c208cb530c09f10ae3b12a0f Mon Sep 17 00:00:00 2001
+From: Martin Vielsmaier <martin.vielsmaier@gmail.com>
+Date: Thu, 3 Aug 2017 10:01:07 +0200
+Subject: [PATCH] Allow for more control over alternates and flarm targets.
+
+---
+ src/Dialogs/Task/AlternatesListDialog.cpp | 2 +-
+ src/Gauge/BigTrafficWidget.cpp            | 3 +++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/Dialogs/Task/AlternatesListDialog.cpp b/src/Dialogs/Task/AlternatesListDialog.cpp
+index c20af77146..a909152732 100644
+--- a/src/Dialogs/Task/AlternatesListDialog.cpp
++++ b/src/Dialogs/Task/AlternatesListDialog.cpp
+@@ -171,5 +171,5 @@ dlgAlternatesListShowModal()
+   if (i < 0 || (unsigned)i >= widget.alternates.size())
+     return;
+ 
+-  dlgWaypointDetailsShowModal(widget.alternates[i].waypoint, false);
++  dlgWaypointDetailsShowModal(widget.alternates[i].waypoint, true);
+ }
+diff --git a/src/Gauge/BigTrafficWidget.cpp b/src/Gauge/BigTrafficWidget.cpp
+index eed5fc0306..a6cf5149f5 100644
+--- a/src/Gauge/BigTrafficWidget.cpp
++++ b/src/Gauge/BigTrafficWidget.cpp
+@@ -775,6 +775,9 @@ FlarmTrafficControl::OnKeyDown(unsigned key_code)
+ 
+     ZoomOut();
+     return true;
++  case KEY_F10:
++    NextTarget();
++    return true;
+   }
+ 
+   return FlarmTrafficWindow::OnKeyDown(key_code) ||
+-- 
+2.25.1
+

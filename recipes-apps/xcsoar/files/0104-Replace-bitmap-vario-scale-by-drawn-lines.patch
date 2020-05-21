@@ -1,0 +1,213 @@
+From 0e8dff22a45316d61d8b05efe8e187dd842e2ba1 Mon Sep 17 00:00:00 2001
+From: Martin Vielsmaier <martin.vielsmaier@gmail.com>
+Date: Tue, 24 Jan 2017 07:46:19 +0000
+Subject: [PATCH] Replace bitmap vario scale by drawn lines.
+
+---
+ src/Gauge/GaugeVario.cpp | 63 +++++++++++++++++++++++-----------------
+ src/Gauge/GaugeVario.hpp |  2 +-
+ src/Look/VarioLook.cpp   | 11 ++++---
+ src/Look/VarioLook.hpp   |  4 +--
+ 4 files changed, 44 insertions(+), 36 deletions(-)
+
+diff --git a/src/Gauge/GaugeVario.cpp b/src/Gauge/GaugeVario.cpp
+index b9608b8249..48585ce77d 100644
+--- a/src/Gauge/GaugeVario.cpp
++++ b/src/Gauge/GaugeVario.cpp
+@@ -60,11 +60,10 @@ void
+ GaugeVario::OnPaintBuffer(Canvas &canvas)
+ {
+   const PixelRect rc = GetClientRect();
+-  const unsigned width = rc.GetWidth(), height = rc.GetHeight();
+ 
+   if (!IsPersistent() || !layout_initialised) {
+-    unsigned value_height = 4 + look.value_font.GetCapitalHeight()
+-      + look.text_font->GetCapitalHeight();
++    unsigned value_height = 15 + look.value_font.GetCapitalHeight()
++      + look.label_font.GetCapitalHeight();
+ 
+     middle_position.y = offset.y - value_height / 2;
+     middle_position.x = rc.right;
+@@ -73,9 +72,7 @@ GaugeVario::OnPaintBuffer(Canvas &canvas)
+     bottom_position.y = middle_position.y + value_height;
+     bottom_position.x = rc.right;
+ 
+-    canvas.Stretch(rc.left, rc.top, width, height,
+-                   look.background_bitmap,
+-                   look.background_x, 0, 58, 120);
++    RenderScale(canvas);
+ 
+     layout_initialised = true;
+   }
+@@ -163,15 +160,13 @@ GaugeVario::OnPaintBuffer(Canvas &canvas)
+                 vvaldisplay,
+                 _T("Gross"));
+   }
+-
+-  RenderZero(canvas);
+ }
+ 
+ gcc_const
+ static PixelPoint
+ TransformRotatedPoint(IntPoint2D pt, IntPoint2D offset)
+ {
+-  return { pt.x + offset.x, (pt.y * 112 / 100) + offset.y + 1 };
++  return { pt.x + offset.x, pt.y + offset.y };
+ }
+ 
+ void
+@@ -223,18 +218,6 @@ GaugeVario::RenderClimb(Canvas &canvas)
+                           look.background_color);
+ }
+ 
+-void
+-GaugeVario::RenderZero(Canvas &canvas)
+-{
+-  if (look.inverse)
+-    canvas.SelectWhitePen();
+-  else
+-    canvas.SelectBlackPen();
+-
+-  canvas.DrawLine(0, offset.y, Layout::Scale(17), offset.y);
+-  canvas.DrawLine(0, offset.y + 1, Layout::Scale(17), offset.y + 1);
+-}
+-
+ int
+ GaugeVario::ValueToNeedlePos(double Value)
+ {
+@@ -304,6 +287,34 @@ GaugeVario::RenderNeedle(Canvas &canvas, int i, bool average, bool clear)
+     canvas.DrawTriangleFan(getPolygon(i), 3);
+ }
+ 
++void
++GaugeVario::RenderScale(Canvas &canvas)
++{
++  dirty = true;
++
++  canvas.SelectNullPen();
++
++  if (look.inverse)
++    canvas.SelectWhitePen();
++  else
++    canvas.SelectBlackPen();
++
++  PixelPoint center = offset;
++
++  auto l = Layout::Scale(7);
++  auto r = Layout::Scale(51);
++  for(double val = -4.0; val <= 4.0; val += 1.0) {
++    int i = ValueToNeedlePos(val);
++    Angle alpha = Angle::Degrees(i);
++    double sin_i = alpha.fastsine();
++    double cos_i = alpha.fastcosine();
++    PixelPoint a = {center.x - cos_i * (r + l), center.y + sin_i * (r + l)};
++    PixelPoint b = {center.x - cos_i * r, center.y + sin_i * r};
++    canvas.DrawLine(a, b);
++    canvas.DrawLine({a.x, a.y + 1}, {b.x, b.y + 1});
++  }
++}
++
+ // TODO code: Optimise vario rendering, this is slow
+ void
+ GaugeVario::RenderValue(Canvas &canvas, int x, int y,
+@@ -318,7 +329,7 @@ GaugeVario::RenderValue(Canvas &canvas, int x, int y,
+ 
+     value_info->rc.right = x - Layout::Scale(5);
+     value_info->rc.top = y + Layout::Scale(3)
+-      + look.text_font->GetCapitalHeight();
++      + look.label_font.GetCapitalHeight();
+ 
+     value_info->rc.left = value_info->rc.right;
+     // update back rect with max label size
+@@ -343,12 +354,12 @@ GaugeVario::RenderValue(Canvas &canvas, int x, int y,
+     label_info->rc.left = label_info->rc.right;
+     // update back rect with max label size
+     label_info->rc.bottom = label_info->rc.top
+-      + look.text_font->GetCapitalHeight();
++      + look.label_font.GetCapitalHeight();
+ 
+     label_info->text_position.x = label_info->rc.left;
+     label_info->text_position.y = label_info->rc.top
+-      + look.text_font->GetCapitalHeight()
+-      - look.text_font->GetAscentHeight();
++      + look.label_font.GetCapitalHeight()
++      - look.label_font.GetAscentHeight();
+ 
+     label_info->last_value = -9999;
+     label_info->last_text[0] = '\0';
+@@ -359,7 +370,7 @@ GaugeVario::RenderValue(Canvas &canvas, int x, int y,
+ 
+   if (!IsPersistent() || (dirty && !StringIsEqual(label_info->last_text, label))) {
+     canvas.SetTextColor(look.dimmed_text_color);
+-    canvas.Select(*look.text_font);
++    canvas.Select(look.label_font);
+     tsize = canvas.CalcTextSize(label);
+     label_info->text_position.x = label_info->rc.right - tsize.cx;
+ 
+diff --git a/src/Gauge/GaugeVario.hpp b/src/Gauge/GaugeVario.hpp
+index 4355d2dfb9..78e788b0b6 100644
+--- a/src/Gauge/GaugeVario.hpp
++++ b/src/Gauge/GaugeVario.hpp
+@@ -119,7 +119,6 @@ protected:
+   virtual void OnPaintBuffer(Canvas &canvas) override;
+ 
+ private:
+-  void RenderZero(Canvas &canvas);
+   void RenderValue(Canvas &canvas, int x, int y,
+                    DrawInfo *diValue, DrawInfo *diLabel,
+                    double Value, const TCHAR *Label);
+@@ -128,6 +127,7 @@ private:
+   void RenderBugs(Canvas &canvas);
+   int  ValueToNeedlePos(double Value);
+   void RenderNeedle(Canvas &canvas, int i, bool average, bool clear);
++  void RenderScale(Canvas &canvas);
+   void RenderVarioLine(Canvas &canvas, int i, int sink, bool clear);
+   void RenderClimb(Canvas &canvas);
+ 
+diff --git a/src/Look/VarioLook.cpp b/src/Look/VarioLook.cpp
+index 50801fc051..ccef525bb2 100644
+--- a/src/Look/VarioLook.cpp
++++ b/src/Look/VarioLook.cpp
+@@ -57,16 +57,15 @@ VarioLook::Initialise(bool _inverse, bool _colors,
+   thick_sink_pen.Create(Layout::Scale(5), sink_color);
+   thick_lift_pen.Create(Layout::Scale(5), lift_color);
+ 
+-  background_bitmap.Load(Units::GetUserVerticalSpeedUnit() == Unit::KNOTS
+-                         ? IDB_VARIOSCALEC : IDB_VARIOSCALEA);
+-  background_x = inverse ? 58 : 0;
+-
+   climb_bitmap.Load(inverse ? IDB_CLIMBSMALLINV : IDB_CLIMBSMALL);
+ 
+   text_font = &_text_font;
+ 
+-  const unsigned value_font_height = Layout::FontScale(10);
+-  value_font.Load(FontDescription(value_font_height, false, false, true));
++  const unsigned label_font_height = Layout::FontScale(12);
++  label_font.Load(FontDescription(label_font_height, false, false, false));
++
++  const unsigned value_font_height = Layout::FontScale(30);
++  value_font.Load(FontDescription(value_font_height, false, false, false));
+ 
+   unsigned unit_font_height = std::max(value_font_height * 2u / 5u, 7u);
+   unit_font.Load(FontDescription(unit_font_height));
+diff --git a/src/Look/VarioLook.hpp b/src/Look/VarioLook.hpp
+index b427c20e89..c9a657b89a 100644
+--- a/src/Look/VarioLook.hpp
++++ b/src/Look/VarioLook.hpp
+@@ -43,12 +43,10 @@ struct VarioLook {
+ 
+   Pen thick_background_pen, thick_sink_pen, thick_lift_pen;
+ 
+-  Bitmap background_bitmap;
+-  unsigned background_x;
+-
+   Bitmap climb_bitmap;
+ 
+   const Font *text_font;
++  Font label_font;
+   Font value_font;
+ 
+   Font unit_font;
+-- 
+2.25.1
+

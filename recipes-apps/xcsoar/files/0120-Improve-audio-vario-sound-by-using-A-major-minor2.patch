@@ -1,0 +1,49 @@
+diff --git a/src/Audio/VarioSynthesiser.cpp b/src/Audio/VarioSynthesiser.cpp
+index 57ade64342..5d77a3d0d9 100644
+--- a/src/Audio/VarioSynthesiser.cpp
++++ b/src/Audio/VarioSynthesiser.cpp
+@@ -26,9 +26,31 @@ Copyright_License {
+ #include "Util/Clamp.hpp"
+ 
+ #include <algorithm>
++#include <vector>
+ 
+ #include <cassert>
+ 
++std::vector<int> freq = {
++  //a dur/a major
++     880, //.0f,      //a
++     830, //.609f,    //gis
++     739, //.989f,    //fis
++     659, //.255f,    //e
++     587, //.330f,    //d
++     554, //.365f,    //cis
++     493, //.883f,    //h
++     440, //.0f,      //a
++  //a moll/a minor
++     415, //.305f,    //gis
++     349, //.228f,    //f
++     329, //.628f,    //e
++     293, //.665f,    //d
++     //261, //.626f,    //c
++     //246, //.942f,    //h
++     //220, //.0f       //a
++};
++int freq_high = 7;
++
+ /**
+  * The minimum and maximum vario range for the constants below [cm/s].
+  */
+@@ -37,10 +59,8 @@ static constexpr int min_vario = -500, max_vario = 500;
+ unsigned
+ VarioSynthesiser::VarioToFrequency(int ivario)
+ {
+-  return ivario > 0
+-    ? (zero_frequency + (unsigned)ivario * (max_frequency - zero_frequency)
+-       / (unsigned)max_vario)
+-    : (zero_frequency - (unsigned)(ivario * (int)(zero_frequency - min_frequency) / min_vario));
++  int idx = Clamp((max_vario - ivario) / (max_vario / freq_high), 0, (int)freq.size() - 1);
++  return (unsigned)freq.at(idx);
+ }
+ 
+ void

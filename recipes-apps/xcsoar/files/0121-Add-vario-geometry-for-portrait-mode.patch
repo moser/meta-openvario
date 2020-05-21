@@ -1,0 +1,24 @@
+From a1bc43ce3a8c142ce68bc9478eec27abf1cf4e42 Mon Sep 17 00:00:00 2001
+From: Martin Vielsmaier <martin.vielsmaier@gmail.com>
+Date: Tue, 14 Mar 2017 20:59:24 +0000
+Subject: [PATCH] Add vario geometry for portrait mode.
+
+---
+ src/Gauge/GaugeVario.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/Gauge/GaugeVario.cpp b/src/Gauge/GaugeVario.cpp
+index 48585ce77d..c1e83a0d8a 100644
+--- a/src/Gauge/GaugeVario.cpp
++++ b/src/Gauge/GaugeVario.cpp
+@@ -302,6 +302,7 @@ GaugeVario::RenderScale(Canvas &canvas)
+   PixelPoint center = offset;
+ 
+   auto l = Layout::Scale(7);
++  //auto r = Layout::Scale(40);  // Portrait
+   auto r = Layout::Scale(51);
+   for(double val = -4.0; val <= 4.0; val += 1.0) {
+     int i = ValueToNeedlePos(val);
+-- 
+2.25.1
+

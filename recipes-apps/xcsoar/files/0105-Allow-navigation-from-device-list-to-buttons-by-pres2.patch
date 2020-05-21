@@ -1,0 +1,36 @@
+diff --git a/src/Dialogs/Device/DeviceListDialog.cpp b/src/Dialogs/Device/DeviceListDialog.cpp
+index 79e2d2b397..3decaa1656 100644
+--- a/src/Dialogs/Device/DeviceListDialog.cpp
++++ b/src/Dialogs/Device/DeviceListDialog.cpp
+@@ -213,12 +213,18 @@ public:
+     devices->RemovePortListener(*this);
+   }
+ 
++  /* virtual methods from ListCursorHandler */
++  bool CanActivateItem(unsigned index) const noexcept override {
++    return true;
++  }
++
+   /* virtual methods from class List::Handler */
+    void OnPaintItem(Canvas &canvas, const PixelRect rc,
+                     unsigned idx) noexcept override;
+   void OnCursorMoved(unsigned index) noexcept override;
+ 
+ private:
++  void OnActivateItem(unsigned index) noexcept override;
+   /* virtual methods from class ActionListener */
+   void OnAction(int id) noexcept override;
+ 
+@@ -667,6 +673,12 @@ DeviceListWidget::DebugCurrent()
+   ShowMessageBox(msg, _("Debug"), MB_OK | MB_ICONINFORMATION);
+ }
+ 
++void
++DeviceListWidget::OnActivateItem(unsigned index) noexcept
++{
++  edit_button->SetFocus();
++}
++
+ void
+ DeviceListWidget::OnAction(int id) noexcept
+ {

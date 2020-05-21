@@ -1,0 +1,97 @@
+From 7d7fc23bf925884c5d2845f2ac79cd5f4573e88b Mon Sep 17 00:00:00 2001
+From: Martin Vielsmaier <martin.vielsmaier@gmail.com>
+Date: Thu, 16 Feb 2017 20:26:11 +0000
+Subject: [PATCH] Add vario volume interface.
+
+---
+ src/ActionInterface.cpp |  7 +++++++
+ src/ActionInterface.hpp |  5 +++++
+ src/Lua/Settings.cpp    | 17 +++++++++++++++++
+ 3 files changed, 29 insertions(+)
+
+diff --git a/src/ActionInterface.cpp b/src/ActionInterface.cpp
+index aed0e9cd91..e7cdd2b396 100644
+--- a/src/ActionInterface.cpp
++++ b/src/ActionInterface.cpp
+@@ -103,6 +103,13 @@ ActionInterface::SendGetComputerSettings()
+   calculation_thread->SetScreenDistanceMeters(main_window->GetProjection().GetScreenDistanceMeters());
+ }
+ 
++void ActionInterface::SetVarioVolume(int pct)
++{
++  UISettings &settings = CommonInterface::SetUISettings();
++  settings.sound.vario.volume = pct;
++  AudioVarioGlue::Configure(CommonInterface::GetUISettings().sound.vario);
++}
++
+ void
+ ActionInterface::SetBallast(double ballast, bool to_devices)
+ {
+diff --git a/src/ActionInterface.hpp b/src/ActionInterface.hpp
+index 86012ca0cc..6c4a40c5e3 100644
+--- a/src/ActionInterface.hpp
++++ b/src/ActionInterface.hpp
+@@ -25,6 +25,7 @@ Copyright_License {
+ #define XCSOAR_ACTION_INTERFACE_HPP
+ 
+ #include "Interface.hpp"
++#include "Audio/VarioGlue.hpp"
+ 
+ /** 
+  * Class to hold data/methods accessible by interface subsystems
+@@ -33,6 +34,10 @@ Copyright_License {
+ namespace ActionInterface {
+   using namespace CommonInterface;
+ 
++  /**
++   */
++  void SetVarioVolume(int pct);
++
+   /**
+    * Configure a new Ballast setting in #ComputerSettings, and
+    * forward it to all XCSoar modules that want it.
+diff --git a/src/Lua/Settings.cpp b/src/Lua/Settings.cpp
+index a4b093274f..40b32361e6 100644
+--- a/src/Lua/Settings.cpp
++++ b/src/Lua/Settings.cpp
+@@ -42,6 +42,11 @@ l_settings_index(lua_State *L)
+       CommonInterface::GetComputerSettings();
+     
+     Lua::Push(L, settings_computer.polar.glide_polar_task.GetMC());
++  } else if (StringIsEqual(name, "variovol")) {
++      const UISettings &settings_ui = 
++        CommonInterface::GetUISettings();
++    
++      Lua::Push(L, settings_ui.sound.vario.volume);
+   } else if (StringIsEqual(name, "bugs")) {
+       /* How clean the glider is. */
+       const ComputerSettings &settings_computer = 
+@@ -122,6 +127,17 @@ l_settings_index(lua_State *L)
+   return 1;
+ }
+ 
++
++static int
++l_settings_setvariovol(lua_State *L)
++{
++  if (lua_gettop(L) != 1)
++    return luaL_error(L, "Invalid parameters");
++
++  ActionInterface::SetVarioVolume(luaL_checknumber(L, 1));
++  return 0;
++}
++
+ static int
+ l_settings_setmc(lua_State *L)
+ {
+@@ -178,6 +194,7 @@ l_settings_setmaxtemp(lua_State *L)
+ }
+ 
+ static constexpr struct luaL_Reg settings_funcs[] = {
++  {"setvariovol", l_settings_setvariovol},
+   {"setmc", l_settings_setmc},
+   {"setbugs", l_settings_setbugs},
+   {"setqnh", l_settings_setqnh},
+-- 
+2.25.1
+
